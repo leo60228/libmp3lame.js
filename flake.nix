@@ -29,7 +29,15 @@
             '';
             postBuild = ''
             pushd libmp3lame/.libs/
-            emcc -O2 ./libmp3lame.so -o ./libmp3lame.js -s ALLOW_MEMORY_GROWTH=1 -s MALLOC=emmalloc -s MODULARIZE=1 -s EXPORT_ES6=1
+            emcc \
+              -O2 \
+              -I ../../include/ \
+              --bind ${./bindings.cpp} \
+              ./libmp3lame.so \
+              -o ./libmp3lame.js \
+              -s ALLOW_MEMORY_GROWTH=1 \
+              -s MALLOC=emmalloc \
+              -s MODULARIZE=1
             popd
             '';
             outputs = [ "out" ];
