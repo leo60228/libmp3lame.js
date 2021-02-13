@@ -68,7 +68,7 @@ struct LAME {
     void encode(val pcmVal) {
         validate();
         std::vector<short> pcm = vecFromJSArray<short>(pcmVal);
-        int ret = lame_encode_buffer_interleaved(lame, pcm.data(), pcm.size(), buf.data() + written, buf.size() - written);
+        int ret = lame_encode_buffer_interleaved(lame, pcm.data(), pcm.size() / 2, buf.data() + written, buf.size() - written);
         ensure(ret);
         written += ret;
     }
@@ -78,6 +78,8 @@ struct LAME {
         int ret = lame_encode_flush(lame, buf.data() + written, buf.size() - written);
         ensure(ret);
         written += ret;
+
+        ensure(lame_get_lametag_frame(lame, buf.data(), buf.size()));
     }
 
     val buffer() {
