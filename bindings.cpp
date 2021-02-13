@@ -48,6 +48,7 @@ void error(const char* format, va_list args) {
 struct LAME {
     lame_global_flags* lame;
     std::vector<unsigned char> buf;
+    int channels;
     int written;
 
     void validate() {
@@ -56,19 +57,24 @@ struct LAME {
         }
     }
 
-    LAME(lame_global_flags* inner, int size) : lame(inner), buf(size), written(0) {
+    LAME(lame_global_flags* inner, int size, int ch) : lame(inner), buf(size), channels(ch), written(0) {
         validate();
         ensure(lame_init_params(lame));
     }
 
-    LAME(LAME&& original) : lame(original.lame), buf(original.buf), written(original.written) {
+    LAME(LAME&& original) : lame(original.lame), buf(original.buf), channels(original.channels), written(original.written) {
         original.lame = nullptr;
     }
 
     void encode(val pcmVal) {
         validate();
         std::vector<short> pcm = vecFromJSArray<short>(pcmVal);
-        int ret = lame_encode_buffer_interleaved(lame, pcm.data(), pcm.size() / 2, buf.data() + written, buf.size() - written);
+        int ret;
+        if (channels == 2) {
+            ret = lame_encode_buffer_interleaved(lame, pcm.data(), pcm.size() / 2, buf.data() + written, buf.size() - written);
+        } else {
+            ret = lame_encode_buffer(lame, pcm.data(), pcm.data(), pcm.size(), buf.data() + written, buf.size() - written);
+        }
         ensure(ret);
         written += ret;
     }
@@ -96,8 +102,9 @@ struct LAME {
 
 struct LAMEConfig {
     lame_global_flags* lame;
+    int channels;
 
-    LAMEConfig() {
+    LAMEConfig() : channels(2) {
         lame = lame_init();
         ensure(lame_set_errorf(lame, error));
         ensure(lame_set_debugf(lame, log));
@@ -110,8 +117,9 @@ struct LAMEConfig {
         }
     }
 
-    void setChannels(int channels) {
+    void setChannels(int ch) {
         validate();
+        channels = ch;
         ensure(lame_set_num_channels(lame, channels));
     }
 
@@ -127,11 +135,12 @@ struct LAMEConfig {
 
     void setBitrate(int bitrate) {
         validate();
-        ensure(lame_set_brate(lame, bitrate));
+        ensure(lame_set_VBR(lame, vbr_abr));
+        ensure(lame_set_VBR_mean_bitrate_kbps(lame, bitrate));
     }
 
     LAME build(int size) {
-        LAME built(lame, size);
+        LAME built(lame, size, channels);
 
         lame = nullptr;
 
