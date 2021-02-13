@@ -18,7 +18,9 @@
             stdenv = pkgs.emscriptenStdenv;
           }).overrideAttrs (oldAttrs: {
             configurePhase = ''
-            HOME=$TMPDIR
+            HOME=$TMPDIR/home
+            export EM_CACHE=$TMPDIR/cache
+
             runHook preConfigure
 
             emconfigure ./configure --prefix=$out $configureFlags CFLAGS=-O2
@@ -27,7 +29,7 @@
             '';
             postBuild = ''
             pushd libmp3lame/.libs/
-            emcc -O2 ./libmp3lame.so -o ./libmp3lame.js
+            emcc -O2 ./libmp3lame.so -o ./libmp3lame.js -s ALLOW_MEMORY_GROWTH=1 -s MALLOC=emmalloc -s MODULARIZE=1 -s EXPORT_ES6=1
             popd
             '';
             outputs = [ "out" ];
