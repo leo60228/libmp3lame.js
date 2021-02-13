@@ -1,0 +1,12 @@
+{
+  "name": "libmp3lame.js",
+  "version": "1.0.0",
+  "description": "LAME bindings for JavaScript",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "nix build -o libmp3lame -L .#lame && cp libmp3lame/lib/* lib/ && rm libmp3lame"
+  },
+  "author": "leo60228",
+  "license": "MIT"
+}
