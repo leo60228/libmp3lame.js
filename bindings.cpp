@@ -79,6 +79,16 @@ struct LAME {
         written += ret;
     }
 
+    void encodeFloats(val leftVal, val rightVal) {
+        validate();
+        std::vector<float> left = vecFromJSArray<float>(leftVal);
+        std::vector<float> right = vecFromJSArray<float>(rightVal);
+        int size = left.size() < right.size() ? left.size() : right.size();
+        int ret = lame_encode_buffer_ieee_float(lame, left.data(), right.data(), size, buf.data() + written, buf.size() - written);
+        ensure(ret);
+        written += ret;
+    }
+
     void flush() {
         validate();
         int ret = lame_encode_flush(lame, buf.data() + written, buf.size() - written);
@@ -155,6 +165,7 @@ struct LAMEConfig {
 EMSCRIPTEN_BINDINGS(libmp3lame) {
     class_<LAME>("LAME")
         .function("encode", &LAME::encode)
+        .function("encodeFloats", &LAME::encodeFloats)
         .function("flush", &LAME::flush)
         .function("buffer", &LAME::buffer)
         ;
