@@ -1,2 +1,5 @@
 node_modules/
 .direnv
+dist
+.cache
+*.mp3

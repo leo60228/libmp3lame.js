@@ -1,4 +1,4 @@
-import LAMEConfig from './lib/index.js';
+import LAMEConfig from '../../lib/index.js';
 import fsCallbacks from 'fs';
 
 const fs = fsCallbacks.promises;
