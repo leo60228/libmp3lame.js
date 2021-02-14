@@ -1,7 +1,8 @@
 {
   "name": "libmp3lame.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "LAME bindings for JavaScript",
+  "repository": "https://github.com/leo60228/libmp3lame.js",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
