@@ -66,9 +66,9 @@ struct LAME {
         original.lame = nullptr;
     }
 
-    void encode(val pcmVal) {
+    void encode(const val& pcmVal) {
         validate();
-        std::vector<short> pcm = vecFromJSArray<short>(pcmVal);
+        std::vector<short> pcm = convertJSArrayToNumberVector<short>(pcmVal);
         int ret;
         if (channels == 2) {
             ret = lame_encode_buffer_interleaved(lame, pcm.data(), pcm.size() / 2, buf.data() + written, buf.size() - written);
@@ -79,10 +79,10 @@ struct LAME {
         written += ret;
     }
 
-    void encodeFloats(val leftVal, val rightVal) {
+    void encodeFloats(const val& leftVal, const val& rightVal) {
         validate();
-        std::vector<float> left = vecFromJSArray<float>(leftVal);
-        std::vector<float> right = vecFromJSArray<float>(rightVal);
+        std::vector<float> left = convertJSArrayToNumberVector<float>(leftVal);
+        std::vector<float> right = convertJSArrayToNumberVector<float>(rightVal);
         int size = left.size() < right.size() ? left.size() : right.size();
         int ret = lame_encode_buffer_ieee_float(lame, left.data(), right.data(), size, buf.data() + written, buf.size() - written);
         ensure(ret);

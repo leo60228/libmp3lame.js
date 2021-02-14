@@ -7,7 +7,35 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
       in rec {
-        packages = {
+        packages = rec {
+          binaryen = (pkgs.binaryen.override {
+            inherit emscripten;
+          }).overrideAttrs (oldAttrs: rec {
+            version = "99";
+            src = pkgs.fetchFromGitHub {
+              owner = "WebAssembly";
+              repo = "binaryen";
+              hash = "sha256-LAa2NzLhGNynFilDHDjJTf8mVY0XKGNryrkiF2rv0ag=";
+              rev = "version_${version}";
+            };
+            patches = [];
+          });
+          emscripten = (pkgs.emscripten.override {
+            inherit binaryen;
+          }).overrideAttrs (oldAttrs: rec {
+            version = "2.0.9";
+            src = pkgs.fetchFromGitHub {
+              owner = "emscripten-core";
+              repo = "emscripten";
+              hash = "sha256-nEPJQjA+LCRLW/sKPV3u29EwGLhdxLFOQAx7wJFXtnU=";
+              rev = version;
+            };
+            installPhase = builtins.replaceStrings [ "emlink.py" "python tests" ] [ "" "# " ] oldAttrs.installPhase;
+          });
+          buildEmscriptenPackage = pkgs.buildEmscriptenPackage.override {
+            inherit emscripten;
+          };
+          emscriptenStdenv = pkgs.stdenv // { mkDerivation = buildEmscriptenPackage; };
           lame = (pkgs.lame.override {
             nasmSupport = false;
             nasm = null;
@@ -15,7 +43,7 @@
             analyzerHooksSupport = false;
             decoderSupport = false;
             frontendSupport = false;
-            stdenv = pkgs.emscriptenStdenv;
+            stdenv = emscriptenStdenv;
           }).overrideAttrs (oldAttrs: {
             configurePhase = ''
             HOME=$TMPDIR/home
@@ -23,14 +51,14 @@
 
             runHook preConfigure
 
-            emconfigure ./configure --prefix=$out $configureFlags CFLAGS=-O2
+            emconfigure ./configure --prefix=$out $configureFlags CFLAGS='-O3 -flto'
 
             runHook postConfigure
             '';
             postBuild = ''
             pushd libmp3lame/.libs/
             emcc \
-              -O2 \
+              -O3 -flto \
               -I ../../include/ \
               --bind ${./bindings.cpp} \
               ./libmp3lame.so \
