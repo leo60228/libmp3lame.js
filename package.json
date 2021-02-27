@@ -6,17 +6,29 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "nix build -o libmp3lame -L .#lame && cp --no-preserve=mode libmp3lame/lib/* lib/ && rm libmp3lame",
-    "example:web": "f() { cd examples/web/$1; trap 'kill $(jobs -p)' EXIT; parcel index.html *.wasm & sleep 1; firefox http://127.0.0.1:1234/index.html & wait; }; f",
-    "example:node": "f() { node examples/node/$1.mjs; }; f"
+    "build:nix": "nix build -o libmp3lame -L .#lame",
+    "build:wasm": "cp --no-preserve=mode libmp3lame/lib/libmp3lame.wasm lib/libmp3lame.wasm",
+    "build:js": "cp --no-preserve=mode libmp3lame/lib/libmp3lame.js lib/libmp3lame.cjs",
+    "build": "npm run build:nix && npm run build:wasm && npm run build:js && rm libmp3lame",
+    "example:web": "f() { cd examples/web && webpack serve -c webpack.config.js --env EXAMPLE=$1; }; f",
+    "example:node": "f() { node examples/node/$1.js; }; f"
   },
   "author": "leo60228",
   "license": "MIT",
   "devDependencies": {
     "audio-feeder": "^0.5.0",
-    "parcel-bundler": "^1.12.4"
+    "html-loader": "^2.1.1",
+    "html-webpack-plugin": "^5.2.0",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
   },
   "browserslist": [
     "last 1 Firefox version"
-  ]
+  ],
+  "type": "module",
+  "browser": {
+    "fs": false,
+    "path": false
+  }
 }

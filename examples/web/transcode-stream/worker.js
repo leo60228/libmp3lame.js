@@ -20,7 +20,7 @@ onmessage = async (evt) => {
         config.setOutputSampleRate(22050);
         config.setBitrate(48);
 
-        let lame = await config.build(1024 * 1024 * 10, 'libmp3lame.wasm');
+        let lame = await config.build(1024 * 1024 * 10);
 
         console.time('encoding');
         console.log('encoding');

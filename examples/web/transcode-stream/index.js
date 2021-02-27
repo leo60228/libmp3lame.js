@@ -11,7 +11,7 @@ async function transcode(data) {
     let feeder = new AudioFeeder();
     feeder.init(2, 44100);
 
-    let encoder = new Worker('worker.js');
+    let encoder = new Worker(new URL('./worker.js', import.meta.url));
     let started = false;
 
     encoder.onmessage = async (evt) => {
