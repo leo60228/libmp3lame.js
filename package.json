@@ -1,6 +1,6 @@
 {
   "name": "libmp3lame.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "LAME bindings for JavaScript",
   "repository": "https://github.com/leo60228/libmp3lame.js",
   "main": "lib/index.js",
